@@ -20,9 +20,7 @@ All trademarks and intellectual property are protected. ™
 # st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
 st.title("📈 پیش‌بینی نرخ دلار آزاد")
 # نمایش پیش‌بینی عددی
-st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
-st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
-st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
+
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
     'https://raw.githubusercontent.com/AZFARHAD24511/exchange_rates_IRAN/main/'
@@ -122,7 +120,9 @@ except Exception:
 
 # نمایش دقت و p-values
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
-
+st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
+st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
+st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
 # نمایش نمودار
 st.subheader("📊 Historical Data & 2-Day Forecast")
 fig, ax = plt.subplots(figsize=(12, 6))
