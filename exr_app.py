@@ -10,8 +10,15 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 # پیکربندی صفحه
-st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
-st.title("📈 ARIMA")
+st.set_page_config(page_title="📈 پیش‌بینی نرخ دلار آزاد 📈", layout="wide")
+st.markdown("""
+---
+© 2025 Dr. Farhadi. All rights reserved.  
+This application was developed by **Dr. Farhadi**, Ph.D. in *Economics (Econometrics)* and *Data Science*.  
+All trademarks and intellectual property are protected. ™
+""")
+# st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
+# st.title("📈 ARIMA")
 
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
