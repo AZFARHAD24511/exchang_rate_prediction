@@ -19,7 +19,10 @@ All trademarks and intellectual property are protected. ™
 """)
 # st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
 st.title("📈 پیش‌بینی نرخ دلار آزاد")
-
+# نمایش پیش‌بینی عددی
+st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
+st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
+st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
     'https://raw.githubusercontent.com/AZFARHAD24511/exchange_rates_IRAN/main/'
@@ -136,7 +139,4 @@ ax.set_title('USD Free Market Rate Forecast')
 ax.grid(True)
 st.pyplot(fig)
 
-# نمایش پیش‌بینی عددی
-st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
-st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
-st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
+
