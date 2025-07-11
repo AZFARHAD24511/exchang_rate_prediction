@@ -4,7 +4,6 @@ pandas>=1.4
 scikit-learn>=1.0
 Cython>=0.29
 statsmodels>=0.13.2
-pmdarima>=2.0.4
+pmdarima==2.0.4 --find-links https://github.com/alkaline-ml/pmdarima/releases
 pytrends>=4.9
 streamlit>=1.24
-...
