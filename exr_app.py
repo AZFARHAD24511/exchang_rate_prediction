@@ -18,7 +18,7 @@ This application was developed by **Dr. Farhadi**, Ph.D. in *Economics (Economet
 All trademarks and intellectual property are protected. ™
 """)
 # st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
-st.title("📈 "پیش‌بینی نرخ دلار آزاد"")
+st.title("📈 پیش‌بینی نرخ دلار آزاد")
 
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
