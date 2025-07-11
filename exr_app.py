@@ -11,7 +11,7 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 # پیکربندی صفحه
 st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
-st.title("📈 ARIMA with statsmodels")
+st.title("📈 ARIMA")
 
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
@@ -52,7 +52,7 @@ def load_trends_csv():
     df = pd.read_csv(StringIO(r.text), parse_dates=['date'])
     return df.set_index('date').sort_index()
 
-# تابع برای گرفتن داده‌های ناقص از Google Trends
+# گرفتن داده‌های ناقص Google Trends
 @st.cache_data(ttl=3600)
 def fetch_missing_trends(missing_dates, geo='IR'):
     pytrends = TrendReq(hl='fa', tz=330)
@@ -87,30 +87,30 @@ if not missing.empty:
     trends_df = trends_df.reindex(usd_df.index).ffill().bfill()
 
 # ادغام داده‌ها
- df = pd.merge(usd_df, trends_df, left_index=True, right_index=True, how='inner').ffill().bfill()
+df = pd.merge(usd_df, trends_df, left_index=True, right_index=True, how='inner').ffill().bfill()
 price_series = df['price']
 
-# مدل ARIMA و پیش‌بینی دو روز آینده (statsmodels)
-# پارامترهای (p,d,q) نمونه (1,1,1)
-model_sm = ARIMA(price_series, order=(1, 1, 1))
-model_res = model_sm.fit()
+# مدل ARIMA (1,0,1) با statsmodels
+model = ARIMA(price_series, order=(1, 0, 1))
+model_fit = model.fit()
 
-# پیش‌بینی دو دوره آینده
-forecast_vals = model_res.forecast(steps=2)
+# پیش‌بینی دو روز آینده
+forecast_vals = model_fit.forecast(steps=2)
 forecast_dates = [price_series.index[-1] + timedelta(days=i) for i in range(1, 3)]
 
-# محاسبه دقت In-sample (MAE و MAPE)
-preds_in = model_res.predict(start=0, end=len(price_series)-1)
+# محاسبه دقت مدل
+preds_in = model_fit.predict(start=0, end=len(price_series)-1)
 mae = mean_absolute_error(price_series, preds_in)
 mape = mean_absolute_percentage_error(price_series, preds_in) * 100
 
 # استخراج p-value ضرایب
 try:
-    pval_str = ', '.join([f'{name}: {val:.4f}' for name, val in model_res.pvalues.items()])
+    pvals = model_fit.pvalues
+    pval_str = ', '.join([f'{name}: {val:.4f}' for name, val in pvals.items()])
 except Exception:
     pval_str = "در دسترس نیست"
 
-# نمایش همهٔ معیارها
+# نمایش دقت و p-values
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
 
 # نمایش نمودار
@@ -129,7 +129,7 @@ ax.set_title('USD Free Market Rate Forecast')
 ax.grid(True)
 st.pyplot(fig)
 
-# نمایش پیش‌بینی‌ها
-st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals[0]:,.0f}")
-st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals[1]:,.0f}")
+# نمایش پیش‌بینی عددی
+st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
+st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
