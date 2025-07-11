@@ -11,14 +11,16 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 # پیکربندی صفحه
 st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
-st.title("📈 ARIMA (با statsmodels)")
+st.title("📈 ARIMA with statsmodels")
 
+# آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
     'https://raw.githubusercontent.com/AZFARHAD24511/exchange_rates_IRAN/main/'
     'predict/google_trends_daily.csv'
 )
 KEYWORDS = ['خرید دلار', 'فروش دلار', 'دلار فردایی']
 
+# بارگذاری داده‌های دلار آزاد از API
 @st.cache_data(ttl=3600)
 def load_usd_data():
     ts = int(datetime.now().timestamp() * 1000)
@@ -43,12 +45,14 @@ def load_usd_data():
     df = pd.DataFrame(records).set_index('date').sort_index()
     return df
 
+# بارگذاری داده‌های Google Trends از GitHub
 @st.cache_data(ttl=3600)
 def load_trends_csv():
     r = requests.get(GITHUB_TRENDS_CSV_URL)
     df = pd.read_csv(StringIO(r.text), parse_dates=['date'])
     return df.set_index('date').sort_index()
 
+# تابع برای گرفتن داده‌های ناقص از Google Trends
 @st.cache_data(ttl=3600)
 def fetch_missing_trends(missing_dates, geo='IR'):
     pytrends = TrendReq(hl='fa', tz=330)
@@ -65,47 +69,51 @@ def fetch_missing_trends(missing_dates, geo='IR'):
         return df_new.apply(lambda x: x / x.max() * 100)
     return pd.DataFrame(index=missing_dates)
 
+# بارگذاری و ترکیب داده‌ها
 with st.spinner("در حال بارگذاری داده‌ها..."):
     usd_df = load_usd_data()
     trends_df = load_trends_csv()
 
+# استفاده از دو سال اخیر
 two_years_ago = datetime.now() - timedelta(days=730)
 usd_df = usd_df[usd_df.index >= two_years_ago]
 trends_df = trends_df[trends_df.index >= two_years_ago]
 
+# پر کردن تاریخ‌های ناقص
 missing = usd_df.index.difference(trends_df.index)
 if not missing.empty:
     new_trends = fetch_missing_trends(missing)
     trends_df = pd.concat([trends_df, new_trends]).sort_index()
     trends_df = trends_df.reindex(usd_df.index).ffill().bfill()
 
-df = pd.merge(usd_df, trends_df, left_index=True, right_index=True, how='inner').ffill().bfill()
+# ادغام داده‌ها
+ df = pd.merge(usd_df, trends_df, left_index=True, right_index=True, how='inner').ffill().bfill()
 price_series = df['price']
 
-# استفاده از ARIMA ساده از statsmodels
-model = ARIMA(price_series, order=(1, 1, 1))  # یا تنظیم دلخواه تو
-model_fit = model.fit()
+# مدل ARIMA و پیش‌بینی دو روز آینده (statsmodels)
+# پارامترهای (p,d,q) نمونه (1,1,1)
+model_sm = ARIMA(price_series, order=(1, 1, 1))
+model_res = model_sm.fit()
 
-# پیش‌بینی دو روز آینده
-forecast_vals = model_fit.forecast(steps=2)
+# پیش‌بینی دو دوره آینده
+forecast_vals = model_res.forecast(steps=2)
 forecast_dates = [price_series.index[-1] + timedelta(days=i) for i in range(1, 3)]
 
-# محاسبه دقت In-sample
-preds_in = model_fit.predict(start=0, end=len(price_series)-1)
-mae = mean_absolute_error(price_series[1:], preds_in[1:])
-mape = mean_absolute_percentage_error(price_series[1:], preds_in[1:]) * 100
+# محاسبه دقت In-sample (MAE و MAPE)
+preds_in = model_res.predict(start=0, end=len(price_series)-1)
+mae = mean_absolute_error(price_series, preds_in)
+mape = mean_absolute_percentage_error(price_series, preds_in) * 100
 
-# استخراج p-values
+# استخراج p-value ضرایب
 try:
-    pvals = model_fit.pvalues
-    pval_str = ', '.join(f"{k}: {v:.4f}" for k, v in pvals.items())
+    pval_str = ', '.join([f'{name}: {val:.4f}' for name, val in model_res.pvalues.items()])
 except Exception:
     pval_str = "در دسترس نیست"
 
-# نمایش معیارها
+# نمایش همهٔ معیارها
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
 
-# نمودار
+# نمایش نمودار
 st.subheader("📊 Historical Data & 2-Day Forecast")
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(price_series.index, price_series.values, label='Historical')
@@ -121,7 +129,7 @@ ax.set_title('USD Free Market Rate Forecast')
 ax.grid(True)
 st.pyplot(fig)
 
-# نمایش پیش‌بینی
+# نمایش پیش‌بینی‌ها
 st.success(f"🔮 Forecast for {forecast_dates[0].date()}: {forecast_vals[0]:,.0f}")
 st.success(f"🔮 Forecast for {forecast_dates[1].date()}: {forecast_vals[1]:,.0f}")
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
