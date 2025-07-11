@@ -120,9 +120,9 @@ except Exception:
 
 # نمایش دقت و p-values
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
-st.success(f"🔮 برای امروز {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f}")
-st.success(f"🔮 برای فردا {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f}")
-st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%")
+st.success(f"🔮 برای امروز {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f} ریال")
+st.success(f"🔮 برای فردا {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f} ریال")
+st.info(f"MAE: خطا {mae:,.2f} ریال    MAPE: {mape:.2f}%")
 # نمایش نمودار
 st.subheader("📊 Historical Data & 2-Day Forecast")
 fig, ax = plt.subplots(figsize=(12, 6))
