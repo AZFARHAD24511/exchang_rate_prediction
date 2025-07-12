@@ -10,7 +10,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 # پیکربندی صفحه
-st.set_page_config(page_title=" پیش‌بینی نرخ دلار آزاد 📈", layout="wide")
+st.set_page_config(page_title=" پیش‌بینی نرخ دلار آزاد تهران 📈", layout="wide")
 st.markdown("""
 ---
 📈 © 2025 Dr. Farhadi. All rights reserved.  
