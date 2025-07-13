@@ -128,6 +128,7 @@ except Exception:
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
 st.success(f"🔮 نرخ دلار برای {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f} ریال")
 st.success(f"🔮 نرخ دلار برای {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f} ریال")
+st.success(f"🔮 نرخ دلار برای {forecast_dates[2].date()}: {forecast_vals.iloc[2]:,.0f} ریال")
 
 # نمایش نمودار
 st.subheader("📊 Historical Data & 2-Day Forecast")
