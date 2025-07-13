@@ -17,9 +17,7 @@ st.markdown("""
 This application was developed by **Dr. Farhadi**, Ph.D. in *Economics (Econometrics)* and *Data Science*.  
 All trademarks and intellectual property are protected. ™
 """)
-# st.set_page_config(page_title="پیش‌بینی نرخ دلار آزاد", layout="centered")
 st.title("📈 پیش‌بینی نرخ دلار آزاد 📈")
-# نمایش پیش‌بینی عددی
 
 # آدرس فایل ترندز در GitHub
 GITHUB_TRENDS_CSV_URL = (
@@ -61,8 +59,14 @@ def load_trends_csv():
     return df.set_index('date').sort_index()
 
 # گرفتن داده‌های ناقص Google Trends
-@st.cache_data(ttl=3600)
+@st.cache_data(
+    ttl=3600,
+    hash_funcs={pd.DatetimeIndex: lambda idx: idx.astype(str).tolist()}
+)
 def fetch_missing_trends(missing_dates, geo='IR'):
+    # اگر missing_dates از نوع tuple رشته‌ای باشد، تبدیل به DatetimeIndex می‌کنیم
+    if not isinstance(missing_dates, pd.DatetimeIndex):
+        missing_dates = pd.to_datetime(list(missing_dates))
     pytrends = TrendReq(hl='fa', tz=330)
     df_list = []
     start, end = missing_dates.min(), missing_dates.max()
@@ -90,7 +94,9 @@ trends_df = trends_df[trends_df.index >= two_years_ago]
 # پر کردن تاریخ‌های ناقص
 missing = usd_df.index.difference(trends_df.index)
 if not missing.empty:
-    new_trends = fetch_missing_trends(missing)
+    # برای اطمینان، missing را به tuple از رشته‌ها تبدیل می‌کنیم
+    missing_tuple = tuple(date.strftime('%Y-%m-%d') for date in missing)
+    new_trends = fetch_missing_trends(missing_tuple)
     trends_df = pd.concat([trends_df, new_trends]).sort_index()
     trends_df = trends_df.reindex(usd_df.index).ffill().bfill()
 
@@ -120,24 +126,22 @@ except Exception:
 
 # نمایش دقت و p-values
 st.info(f"MAE: {mae:,.2f}    MAPE: {mape:.2f}%    P-values: {pval_str}")
-st.success(f"🔮 نرخ دلار برای ...... {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f} ریال...")
-st.success(f"🔮 نرخ دلار برای ..... {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f} ریال")
-st.success(f"🔮 نرخ دلار برای ..... {forecast_dates[2].date()}: {forecast_vals.iloc[2]:,.0f} ریال")
-st.info(f"MAE: و مقدار خطا... {mae:,.1f} ریال    MAPE: {mape:.2f}%درصد خطا ")
+st.success(f"🔮 نرخ دلار برای {forecast_dates[0].date()}: {forecast_vals.iloc[0]:,.0f} ریال")
+st.success(f"🔮 نرخ دلار برای {forecast_dates[1].date()}: {forecast_vals.iloc[1]:,.0f} ریال")
+
 # نمایش نمودار
 st.subheader("📊 Historical Data & 2-Day Forecast")
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(price_series.index, price_series.values, label='Historical')
-ax.axvline(price_series.index[-1], color='gray', linestyle='--')
+ax.axvline(price_series.index[-1], linestyle='--')
 for i, (d, v) in enumerate(zip(forecast_dates, forecast_vals), start=1):
-    ax.scatter(d, v, color='red')
+    ax.scatter(d, v)
     ax.annotate(
         f'Day+{i}: {v:,.0f}',
-        xy=(d, v), xytext=(0, 10), textcoords='offset points',
-        ha='center', arrowprops=dict(arrowstyle='->', color='red')
+        xy=(d, v), xytext=(0, 10),
+        textcoords='offset points', ha='center',
+        arrowprops=dict(arrowstyle='->')
     )
 ax.set_title('USD Free Market Rate Forecast')
 ax.grid(True)
 st.pyplot(fig)
-
-
